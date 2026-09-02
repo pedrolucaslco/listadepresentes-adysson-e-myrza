@@ -6,6 +6,10 @@
 
     <title>Lista de Presentes</title>
 
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Aboreto&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
     <link rel="stylesheet" href="style.css">
 </head>
 
@@ -15,6 +19,14 @@
         <div class="container">
             <h1>Lista de Presentes</h1>
             <p>Escolha um presente para nos ajudar nessa nova fase.</p>
+
+            <div id="guest-bar" class="guest-bar hidden">
+                <span class="guest-bar-name" id="guest-name"></span>
+                <span class="guest-bar-contact" id="guest-contact"></span>
+                <button id="logout-button" class="secondary">
+                    Alterar pessoa
+                </button>
+            </div>
         </div>
     </header>
 
@@ -32,6 +44,7 @@
                         id="nome"
                         name="nome"
                         placeholder="Digite seu nome"
+                        autocomplete="name"
                         required
                     >
                 </div>
@@ -53,7 +66,7 @@
 
             </form>
 
-            <div id="guest-message"></div>
+            <p id="guest-message" class="guest-message" role="alert" aria-live="assertive"></p>
         </section>
 
         <section id="gifts-section" class="hidden">
@@ -63,24 +76,27 @@
                     <h2>Escolha um presente</h2>
                     <p>Selecione o presente que você gostaria de dar.</p>
                 </div>
+            </div>
 
-                <button id="logout-button" class="secondary">
-                    Alterar pessoa
+            <div id="reservation-notice" class="notice hidden" role="status" aria-live="polite">
+                <span id="notice-message"></span>
+                <button id="notice-close" aria-label="Fechar aviso">
+                    ×
                 </button>
             </div>
 
             <div id="categories"></div>
 
-            <div id="gifts"></div>
+            <div id="gifts" aria-live="polite"></div>
 
         </section>
 
     </main>
 
-    <div id="modal" class="modal hidden">
+    <div id="modal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="modal-title">
         <div class="modal-content">
 
-            <button id="modal-close" class="modal-close">
+            <button id="modal-close" class="modal-close" aria-label="Fechar">
                 ×
             </button>
 
@@ -88,12 +104,20 @@
 
             <p id="modal-description"></p>
 
-            <button id="confirm-button">
-                Confirmar presente
-            </button>
+            <div class="modal-actions">
+                <button id="modal-cancel" class="secondary">
+                    Cancelar
+                </button>
+
+                <button id="confirm-button">
+                    Confirmar presente
+                </button>
+            </div>
 
         </div>
     </div>
+
+    <div id="toast" class="toast" role="status" aria-live="polite"></div>
 
     <script src="app.js"></script>
 

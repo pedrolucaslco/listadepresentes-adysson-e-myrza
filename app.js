@@ -10,18 +10,30 @@ let convidado = {
 };
 
 const guestForm = document.querySelector('#guest-form');
+const loginButton = document.querySelector('#guest-form button[type="submit"]');
 const giftsSection = document.querySelector('#gifts-section');
 const giftsContainer = document.querySelector('#gifts');
 const categoriesContainer = document.querySelector('#categories');
+
+const guestBar = document.querySelector('#guest-bar');
+const guestName = document.querySelector('#guest-name');
+const guestContact = document.querySelector('#guest-contact');
+
+const notice = document.querySelector('#reservation-notice');
+const noticeMessage = document.querySelector('#notice-message');
+const noticeClose = document.querySelector('#notice-close');
 
 const modal = document.querySelector('#modal');
 const modalTitle = document.querySelector('#modal-title');
 const modalDescription = document.querySelector('#modal-description');
 
 const confirmButton = document.querySelector('#confirm-button');
+const modalCancel = document.querySelector('#modal-cancel');
 const modalClose = document.querySelector('#modal-close');
 
 const logoutButton = document.querySelector('#logout-button');
+
+const toast = document.querySelector('#toast');
 
 
 // ============================================================
@@ -29,6 +41,7 @@ const logoutButton = document.querySelector('#logout-button');
 // ============================================================
 
 guestForm.addEventListener('submit', async (event) => {
+
     event.preventDefault();
 
     convidado.nome =
@@ -37,10 +50,30 @@ guestForm.addEventListener('submit', async (event) => {
     convidado.contato =
         document.querySelector('#contato').value.trim();
 
-    await entrar();
+    definirCarregando(
+        loginButton,
+        'Entrando...',
+        true
+    );
+
+    try {
+
+        await entrar();
+
+    } finally {
+
+        definirCarregando(
+            loginButton,
+            'Continuar',
+            false
+        );
+
+    }
+
 });
 
 logoutButton.addEventListener('click', () => {
+
     localStorage.removeItem('convidado');
 
     convidado = {
@@ -49,9 +82,40 @@ logoutButton.addEventListener('click', () => {
     };
 
     giftsSection.classList.add('hidden');
+    guestBar.classList.add('hidden');
+    notice.classList.add('hidden');
+
+    document.querySelector('.guest-section')
+        .classList.remove('hidden');
+
+    document.querySelector('#guest-message').textContent = '';
+
 });
 
 modalClose.addEventListener('click', fecharModal);
+modalCancel.addEventListener('click', fecharModal);
+
+modal.addEventListener('click', (event) => {
+
+    if (event.target === modal) {
+        fecharModal();
+    }
+
+});
+
+document.addEventListener('keydown', (event) => {
+
+    if (event.key === 'Escape' && !modal.classList.contains('hidden')) {
+        fecharModal();
+    }
+
+});
+
+noticeClose.addEventListener('click', () => {
+
+    notice.classList.add('hidden');
+
+});
 
 
 // ============================================================
@@ -78,6 +142,10 @@ async function entrar() {
 
         giftsSection.classList.remove('hidden');
 
+        guestName.textContent = convidado.nome;
+        guestContact.textContent = convidado.contato;
+        guestBar.classList.remove('hidden');
+
         if (reserva.reservas.length > 0) {
             mostrarReserva(reserva.reservas[0]);
         }
@@ -90,6 +158,33 @@ async function entrar() {
 
 }
 
+function iniciar() {
+
+    const salvo = localStorage.getItem('convidado');
+
+    if (!salvo) {
+        return;
+    }
+
+    try {
+
+        convidado = JSON.parse(salvo);
+
+        entrar();
+
+    } catch (error) {
+
+        localStorage.removeItem('convidado');
+
+        convidado = {
+            nome: '',
+            contato: '',
+        };
+
+    }
+
+}
+
 
 // ============================================================
 // Carregar presentes
@@ -97,20 +192,61 @@ async function entrar() {
 
 async function carregarPresentes() {
 
-    const response = await fetch(
-        `${API_URL}?action=presentes`
-    );
+    giftsContainer.innerHTML = gerarSkeleton();
+    giftsContainer.classList.add('loading');
 
-    const data = await response.json();
+    let data;
 
-    if (!data.success) {
-        throw new Error(data.error);
+    try {
+
+        const response = await fetch(
+            `${API_URL}?action=presentes`
+        );
+
+        data = await response.json();
+
+        if (!data.success) {
+            throw new Error(data.error);
+        }
+
+    } catch (error) {
+
+        giftsContainer.innerHTML = '';
+        giftsContainer.classList.remove('loading');
+
+        throw error;
+
     }
 
     presentes = data.presentes;
 
+    giftsContainer.classList.remove('loading');
+
     renderizarCategorias();
     renderizarPresentes();
+}
+
+function gerarSkeleton() {
+
+    const cards = [];
+
+    for (let i = 0; i < 6; i++) {
+
+        cards.push(`
+            <article class="gift gift-skeleton" aria-hidden="true">
+                <div class="gift-image"></div>
+                <div class="gift-content">
+                    <div class="sk sk-cat"></div>
+                    <div class="sk sk-title"></div>
+                    <div class="sk sk-price"></div>
+                    <div class="sk sk-btn"></div>
+                </div>
+            </article>
+        `);
+
+    }
+
+    return cards.join('');
 }
 
 
@@ -264,6 +400,9 @@ function abrirModal(presente) {
         `Você deseja reservar este presente por ${formatarValor(presente.valor)}?`;
 
     modal.classList.remove('hidden');
+
+    modalCancel.focus();
+
 }
 
 
@@ -286,8 +425,11 @@ confirmButton.addEventListener('click', async () => {
         return;
     }
 
-    confirmButton.disabled = true;
-    confirmButton.textContent = 'Reservando...';
+    definirCarregando(
+        confirmButton,
+        'Reservando...',
+        true
+    );
 
     try {
 
@@ -327,21 +469,24 @@ confirmButton.addEventListener('click', async () => {
 
         fecharModal();
 
-        alert(
-            'Presente reservado com sucesso!'
+        mostrarToast(
+            'Presente reservado com sucesso!',
+            'sucesso'
         );
 
         await carregarPresentes();
 
     } catch (error) {
 
-        alert(error.message);
+        mostrarToast(error.message, 'erro');
 
     } finally {
 
-        confirmButton.disabled = false;
-        confirmButton.textContent =
-            'Confirmar presente';
+        definirCarregando(
+            confirmButton,
+            'Confirmar presente',
+            false
+        );
 
     }
 
@@ -370,9 +515,13 @@ async function buscarReserva(contato) {
 
 function mostrarReserva(reserva) {
 
-    alert(
-        `Você já reservou o presente associado a esta reserva.`
-    );
+    const presente = reserva.presente;
+
+    noticeMessage.textContent = presente
+        ? `Você já reservou "${presente.nome}". Obrigado pela ajuda!`
+        : 'Você já reservou um presente com este contato.';
+
+    notice.classList.remove('hidden');
 
 }
 
@@ -414,6 +563,34 @@ function escapeHtml(text) {
 }
 
 
+function definirCarregando(botao, rotulo, ativo) {
+
+    botao.textContent = rotulo;
+
+    botao.disabled = ativo;
+
+    botao.classList.toggle('is-loading', ativo);
+
+}
+
+
+function mostrarToast(mensagem, tipo) {
+
+    toast.textContent = mensagem;
+
+    toast.className = `toast visible ${tipo}`;
+
+    clearTimeout(toast._timer);
+
+    toast._timer = setTimeout(() => {
+
+        toast.classList.remove('visible');
+
+    }, 4000);
+
+}
+
+
 function mostrarErro(mensagem) {
 
     const element =
@@ -421,6 +598,7 @@ function mostrarErro(mensagem) {
 
     element.textContent = mensagem;
 
-    element.style.color = 'red';
-
 }
+
+
+iniciar();
