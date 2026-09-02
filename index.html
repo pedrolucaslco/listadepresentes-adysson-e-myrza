@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Lista de Presentes</title>
+
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <header class="header">
+        <div class="container">
+            <h1>Lista de Presentes</h1>
+            <p>Escolha um presente para nos ajudar nessa nova fase.</p>
+        </div>
+    </header>
+
+    <main class="container">
+
+        <section class="guest-section">
+            <h2>Quem está presenteando?</h2>
+
+            <form id="guest-form">
+
+                <div class="field">
+                    <label for="nome">Seu nome</label>
+                    <input
+                        type="text"
+                        id="nome"
+                        name="nome"
+                        placeholder="Digite seu nome"
+                        required
+                    >
+                </div>
+
+                <div class="field">
+                    <label for="contato">E-mail ou telefone</label>
+                    <input
+                        type="text"
+                        id="contato"
+                        name="contato"
+                        placeholder="E-mail ou telefone"
+                        required
+                    >
+                </div>
+
+                <button type="submit">
+                    Continuar
+                </button>
+
+            </form>
+
+            <div id="guest-message"></div>
+        </section>
+
+        <section id="gifts-section" class="hidden">
+
+            <div class="section-header">
+                <div>
+                    <h2>Escolha um presente</h2>
+                    <p>Selecione o presente que você gostaria de dar.</p>
+                </div>
+
+                <button id="logout-button" class="secondary">
+                    Alterar pessoa
+                </button>
+            </div>
+
+            <div id="categories"></div>
+
+            <div id="gifts"></div>
+
+        </section>
+
+    </main>
+
+    <div id="modal" class="modal hidden">
+        <div class="modal-content">
+
+            <button id="modal-close" class="modal-close">
+                ×
+            </button>
+
+            <h2 id="modal-title"></h2>
+
+            <p id="modal-description"></p>
+
+            <button id="confirm-button">
+                Confirmar presente
+            </button>
+
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+
+</body>
+</html>
