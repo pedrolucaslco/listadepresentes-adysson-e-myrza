@@ -1,4 +1,4 @@
-const API_URL = 'SUA_URL_DO_APPS_SCRIPT';
+const API_URL = 'https://script.google.com/macros/s/AKfycbzKVbuFQDiNu1ShDAMZNWj9B-CkeDhlaUsjZjTu0Wwalez2urW-fjNdJ1PsHSFUh-eBcA/exec';
 
 let presentes = [];
 let categoriaAtual = 'Todos';
