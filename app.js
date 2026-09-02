@@ -183,34 +183,54 @@ function renderizarPresentes() {
             presente.unidades_disponiveis <= 0;
 
         card.innerHTML = `
-            <div class="gift-category">
-                ${escapeHtml(presente.categoria)}
+            ${
+                presente.url_imagem
+                    ? `
+                        <div class="gift-image">
+                            <img
+                                src="${escapeHtml(presente.url_imagem)}"
+                                alt="${escapeHtml(presente.nome)}"
+                                loading="lazy"
+                            >
+                        </div>
+                    `
+                    : ''
+            }
+
+            <div class="gift-content">
+
+                <div class="gift-category">
+                    ${escapeHtml(presente.categoria)}
+                </div>
+
+                <h3>
+                    ${escapeHtml(presente.nome)}
+                </h3>
+
+                <div class="gift-price">
+                    ${formatarValor(presente.valor)}
+                </div>
+
+                <div class="gift-available">
+                    ${
+                        indisponivel
+                            ? 'Indisponível'
+                            : `${presente.unidades_disponiveis} disponível(is)`
+                    }
+                </div>
+
+                <button
+                    ${indisponivel ? 'disabled' : ''}
+                    data-id="${escapeHtml(presente.id)}"
+                >
+                    ${
+                        indisponivel
+                            ? 'Indisponível'
+                            : 'Escolher presente'
+                    }
+                </button>
+
             </div>
-
-            <h3>
-                ${escapeHtml(presente.nome)}
-            </h3>
-
-            <div class="gift-price">
-                ${formatarValor(presente.valor)}
-            </div>
-
-            <div class="gift-available">
-                ${indisponivel
-                    ? 'Indisponível'
-                    : `${presente.unidades_disponiveis} disponível(is)`
-                }
-            </div>
-
-            <button
-                ${indisponivel ? 'disabled' : ''}
-                data-id="${presente.id}"
-            >
-                ${indisponivel
-                    ? 'Indisponível'
-                    : 'Escolher presente'
-                }
-            </button>
         `;
 
         const button = card.querySelector('button');
