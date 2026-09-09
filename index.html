@@ -18,7 +18,7 @@
     <header class="header">
         <div class="container">
             <h1>Lista de Presentes</h1>
-            <p>Escolha um presente para nos ajudar nessa nova fase.</p>
+            <p>Escolha um presente para ajudar o casal nessa nova fase.</p>
 
             <div id="guest-bar" class="guest-bar hidden">
                 <span class="guest-bar-name" id="guest-name"></span>
@@ -31,6 +31,88 @@
     </header>
 
     <main class="container">
+
+        <details class="info-alert">
+
+            <summary>
+                <span class="info-alert-title">
+                    Esta lista é apenas um controle dos noivos
+                </span>
+
+                <span class="info-alert-toggle">
+                    Saiba como entregar o presente
+                </span>
+            </summary>
+
+            <div class="info-alert-content">
+
+                <p>
+                    Esta lista é apenas um <strong>controle</strong> para
+                    o casal saber quem gostaria de presentear com cada item.
+                    A reserva feita aqui <strong>não realiza pagamento nem
+                    entrega</strong> — ela marca somente a intenção do presente.
+                </p>
+
+                <p>
+                    Para <strong>presentear os noivos</strong> com o
+                    <strong>valor em dinheiro</strong>, faça um
+                    <strong>Pix</strong> e envie o comprovante pelo
+                    WhatsApp. Se preferir <strong>comprar ou entregar</strong> o
+                    presente, fale com os noivos antes.
+                </p>
+
+                <div class="pix-box">
+
+                    <h3>Pix para os noivos</h3>
+
+                    <ol class="pix-steps">
+                        <li>
+                            Copie a chave Pix abaixo.
+                        </li>
+
+                        <li>
+                            Faça o Pix no seu banco e envie o
+                            comprovante pelo WhatsApp.
+                        </li>
+                    </ol>
+
+                    <div class="pix-key-box">
+                        <span class="pix-key-label">
+                            Chave Pix (copia e cola)
+                        </span>
+
+                        <code class="pix-key">
+                            00020126360014BR.GOV.BCB.PIX0114+55849811332125204000053039865802BR5925Adysson Cleysson da Silva6009SAO PAULO62140510C0h2Db6n4p6304B231
+                        </code>
+
+                        <button
+                            type="button"
+                            class="pix-copy"
+                            id="banner-copy-pix"
+                        >
+                            Copiar chave Pix
+                        </button>
+                    </div>
+
+                    <p class="pix-hint">
+                        Ou use a chave por telefone:
+                        <strong>8498 1133 212</strong>
+                    </p>
+
+                    <a
+                        href="https://wa.me/5584981133212"
+                        target="_blank"
+                        rel="noopener"
+                        class="whatsapp-button"
+                    >
+                        Enviar comprovante pelo WhatsApp
+                    </a>
+
+                </div>
+
+            </div>
+
+        </details>
 
         <section class="guest-section">
             <h2>Quem está presenteando?</h2>
@@ -71,6 +153,11 @@
 
         <section id="gifts-section" class="hidden">
 
+            <section id="my-reservation" class="my-reservation hidden">
+                <h2>Minhas Reservas</h2>
+                <div id="my-reservation-card"></div>
+            </section>
+
             <div class="section-header">
                 <div>
                     <h2>Escolha um presente</h2>
@@ -100,19 +187,7 @@
                 ×
             </button>
 
-            <h2 id="modal-title"></h2>
-
-            <p id="modal-description"></p>
-
-            <div class="modal-actions">
-                <button id="modal-cancel" class="secondary">
-                    Cancelar
-                </button>
-
-                <button id="confirm-button">
-                    Confirmar presente
-                </button>
-            </div>
+            <div id="modal-body"></div>
 
         </div>
     </div>

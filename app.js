@@ -1,5 +1,11 @@
 const API_URL = 'https://script.google.com/macros/s/AKfycbzKVbuFQDiNu1ShDAMZNWj9B-CkeDhlaUsjZjTu0Wwalez2urW-fjNdJ1PsHSFUh-eBcA/exec';
 
+const PIX_CHAVE = '00020126360014BR.GOV.BCB.PIX0114+55849811332125204000053039865802BR5925Adysson Cleysson da Silva6009SAO PAULO62140510C0h2Db6n4p6304B231';
+
+const PIX_CODIGO = '84981133212';
+
+const WHATSAPP_LINK = 'https://wa.me/5584981133212';
+
 let presentes = [];
 let categoriaAtual = 'Todos';
 let presenteSelecionado = null;
@@ -23,12 +29,11 @@ const notice = document.querySelector('#reservation-notice');
 const noticeMessage = document.querySelector('#notice-message');
 const noticeClose = document.querySelector('#notice-close');
 
-const modal = document.querySelector('#modal');
-const modalTitle = document.querySelector('#modal-title');
-const modalDescription = document.querySelector('#modal-description');
+const myReservation = document.querySelector('#my-reservation');
+const myReservationCard = document.querySelector('#my-reservation-card');
 
-const confirmButton = document.querySelector('#confirm-button');
-const modalCancel = document.querySelector('#modal-cancel');
+const modal = document.querySelector('#modal');
+const modalBody = document.querySelector('#modal-body');
 const modalClose = document.querySelector('#modal-close');
 
 const logoutButton = document.querySelector('#logout-button');
@@ -84,6 +89,8 @@ logoutButton.addEventListener('click', () => {
     giftsSection.classList.add('hidden');
     guestBar.classList.add('hidden');
     notice.classList.add('hidden');
+    myReservation.classList.add('hidden');
+    myReservationCard.innerHTML = '';
 
     document.querySelector('.guest-section')
         .classList.remove('hidden');
@@ -93,7 +100,6 @@ logoutButton.addEventListener('click', () => {
 });
 
 modalClose.addEventListener('click', fecharModal);
-modalCancel.addEventListener('click', fecharModal);
 
 modal.addEventListener('click', (event) => {
 
@@ -116,6 +122,11 @@ noticeClose.addEventListener('click', () => {
     notice.classList.add('hidden');
 
 });
+
+const bannerCopyButton =
+    document.querySelector('#banner-copy-pix');
+
+bannerCopyButton.addEventListener('click', copiarChavePix);
 
 
 // ============================================================
@@ -307,6 +318,12 @@ function renderizarPresentes() {
                     presente.categoria === categoriaAtual
             );
 
+    filtrados.sort((a, b) => {
+        const aIndisponivel = a.unidades_disponiveis <= 0;
+        const bIndisponivel = b.unidades_disponiveis <= 0;
+        return aIndisponivel - bIndisponivel;
+    });
+
     giftsContainer.innerHTML = '';
 
     filtrados.forEach(presente => {
@@ -351,7 +368,7 @@ function renderizarPresentes() {
                     ${
                         indisponivel
                             ? 'Indisponível'
-                            : `${presente.unidades_disponiveis} disponível(is)`
+                            : `${presente.unidades_disponiveis} cota(s)`
                     }
                 </div>
 
@@ -394,14 +411,9 @@ function abrirModal(presente) {
 
     presenteSelecionado = presente;
 
-    modalTitle.textContent = presente.nome;
-
-    modalDescription.textContent =
-        `Você deseja reservar este presente por ${formatarValor(presente.valor)}?`;
+    renderizarViewConfirmacao(presente);
 
     modal.classList.remove('hidden');
-
-    modalCancel.focus();
 
 }
 
@@ -412,6 +424,173 @@ function fecharModal() {
 
     modal.classList.add('hidden');
 
+    modalBody.innerHTML = '';
+
+}
+
+
+function renderizarViewConfirmacao(presente) {
+
+    modalBody.innerHTML = `
+        <h2 id="modal-title">
+            ${escapeHtml(presente.nome)}
+        </h2>
+
+        <p class="modal-description">
+            Você deseja reservar este presente por
+            <strong>${formatarValor(presente.valor)}</strong>?
+        </p>
+
+        <div class="modal-actions">
+            <button id="modal-cancel" class="secondary" type="button">
+                Cancelar
+            </button>
+
+            <button id="confirm-button" type="button">
+                Confirmar presente
+            </button>
+        </div>
+    `;
+
+    const cancelar =
+        document.querySelector('#modal-cancel');
+
+    const confirmar =
+        document.querySelector('#confirm-button');
+
+    cancelar.addEventListener('click', fecharModal);
+
+    confirmar.addEventListener('click', confirmarReserva);
+
+    cancelar.focus();
+
+}
+
+
+function renderizarViewSucesso() {
+
+    const presente = presenteSelecionado;
+
+    modalBody.innerHTML = `
+        <h2 id="modal-title">
+            Presente reservado com sucesso!
+        </h2>
+
+        <p class="modal-description">
+            Você reservou
+            <strong>${escapeHtml(presente.nome)}</strong>
+            no valor de
+            <strong>${formatarValor(presente.valor)}</strong>.
+            Agora escolha como deseja entregar o presente:
+            falar com os noivos ou enviar o Pix.
+        </p>
+
+        <div class="modal-actions">
+            <button id="falando-com-noivos" type="button" class="whatsapp-button">
+                Falar com os noivos
+            </button>
+
+            <button id="enviar-pix" type="button" class="secondary">
+                Enviar Pix do presente
+            </button>
+        </div>
+    `;
+
+    document.querySelector('#falando-com-noivos')
+        .addEventListener('click', () => {
+            window.open(
+                WHATSAPP_LINK,
+                '_blank',
+                'noopener'
+            );
+        });
+
+    document.querySelector('#enviar-pix')
+        .addEventListener('click', renderizarViewPix);
+
+    document.querySelector('#falando-com-noivos')
+        .focus();
+
+}
+
+
+function renderizarViewPix() {
+
+    const presente = presenteSelecionado;
+
+    modalBody.innerHTML = `
+        <h2 id="modal-title">
+            Pix para os noivos
+        </h2>
+
+        <ol class="pix-steps">
+            <li>
+                Copie a chave Pix abaixo.
+            </li>
+
+            <li>
+                No app do seu banco, faça o Pix no
+                valor de
+                <strong>${formatarValor(presente.valor)}</strong>.
+            </li>
+
+            <li>
+                Envie o comprovante pelo WhatsApp.
+            </li>
+        </ol>
+
+        <div class="pix-key-box">
+            <span class="pix-key-label">
+                Chave Pix (copia e cola)
+            </span>
+
+            <code class="pix-key">
+                ${escapeHtml(PIX_CHAVE)}
+            </code>
+
+            <button
+                type="button"
+                class="pix-copy"
+                id="pix-copy-button"
+            >
+                Copiar chave Pix
+            </button>
+        </div>
+
+        <p class="pix-hint">
+            Ou use a chave por telefone:
+            <strong>${escapeHtml(PIX_CODIGO)}</strong>
+        </p>
+
+        <div class="modal-actions">
+            <button id="pix-voltar" type="button" class="secondary">
+                Voltar
+            </button>
+
+            <button id="pix-comprovante" type="button" class="whatsapp-button">
+                Enviar comprovante pelo WhatsApp
+            </button>
+        </div>
+    `;
+
+    document.querySelector('#pix-copy-button')
+        .addEventListener('click', copiarChavePix);
+
+    document.querySelector('#pix-voltar')
+        .addEventListener('click', renderizarViewSucesso);
+
+    document.querySelector('#pix-comprovante')
+        .addEventListener('click', () => {
+            window.open(
+                WHATSAPP_LINK,
+                '_blank',
+                'noopener'
+            );
+        });
+
+    document.querySelector('#pix-copy-button')
+        .focus();
+
 }
 
 
@@ -419,14 +598,17 @@ function fecharModal() {
 // Reserva
 // ============================================================
 
-confirmButton.addEventListener('click', async () => {
+async function confirmarReserva() {
 
-    if (!presenteSelecionado) {
+    const botaoConfirmar =
+        document.querySelector('#confirm-button');
+
+    if (!presenteSelecionado || !botaoConfirmar) {
         return;
     }
 
     definirCarregando(
-        confirmButton,
+        botaoConfirmar,
         'Reservando...',
         true
     );
@@ -467,12 +649,7 @@ confirmButton.addEventListener('click', async () => {
             throw new Error(data.error);
         }
 
-        fecharModal();
-
-        mostrarToast(
-            'Presente reservado com sucesso!',
-            'sucesso'
-        );
+        renderizarViewSucesso();
 
         await carregarPresentes();
 
@@ -483,14 +660,14 @@ confirmButton.addEventListener('click', async () => {
     } finally {
 
         definirCarregando(
-            confirmButton,
+            botaoConfirmar,
             'Confirmar presente',
             false
         );
 
     }
 
-});
+}
 
 
 // ============================================================
@@ -517,11 +694,43 @@ function mostrarReserva(reserva) {
 
     const presente = reserva.presente;
 
-    noticeMessage.textContent = presente
-        ? `Você já reservou "${presente.nome}". Obrigado pela ajuda!`
-        : 'Você já reservou um presente com este contato.';
+    myReservationCard.innerHTML = `
+        ${
+            presente.url_imagem
+                ? `
+                    <div class="gift-image">
+                        <img
+                            src="${escapeHtml(presente.url_imagem)}"
+                            alt="${escapeHtml(presente.nome)}"
+                            loading="lazy"
+                        >
+                    </div>
+                `
+                : ''
+        }
 
-    notice.classList.remove('hidden');
+        <div class="my-reservation-info">
+
+            <div class="gift-category">
+                ${escapeHtml(presente.categoria)}
+            </div>
+
+            <h3>
+                ${escapeHtml(presente.nome)}
+            </h3>
+
+            <div class="gift-price">
+                ${formatarValor(presente.valor)}
+            </div>
+
+            <div class="gift-available">
+                Reservado! Obrigado pela ajuda.
+            </div>
+
+        </div>
+    `;
+
+    myReservation.classList.remove('hidden');
 
 }
 
@@ -559,6 +768,67 @@ function escapeHtml(text) {
     div.textContent = text;
 
     return div.innerHTML;
+
+}
+
+
+function copiarChavePix(event) {
+
+    const botao = event.currentTarget;
+
+    const rotuloOriginal = botao.textContent;
+
+    const exibirCopiado = () => {
+
+        botao.textContent = 'Copiado!';
+
+        setTimeout(() => {
+            botao.textContent = rotuloOriginal;
+        }, 2000);
+
+    };
+
+    if (
+        navigator.clipboard
+        && navigator.clipboard.writeText
+    ) {
+
+        navigator.clipboard.writeText(PIX_CHAVE)
+            .then(exibirCopiado)
+            .catch(() => {
+                copiarFallback(PIX_CHAVE);
+                exibirCopiado();
+            });
+
+        return;
+
+    }
+
+    copiarFallback(PIX_CHAVE);
+
+    exibirCopiado();
+
+}
+
+
+function copiarFallback(texto) {
+
+    const textarea = document.createElement('textarea');
+
+    textarea.value = texto;
+    textarea.setAttribute('readonly', '');
+    textarea.style.position = 'fixed';
+    textarea.style.opacity = '0';
+
+    document.body.appendChild(textarea);
+
+    textarea.select();
+
+    try {
+        document.execCommand('copy');
+    } catch (erro) {}
+
+    document.body.removeChild(textarea);
 
 }
 
